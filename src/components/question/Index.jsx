@@ -15,6 +15,10 @@ const Question = ({ onAnswer }) => {
       }),
     ]);
     const triviaData = await triviaRes.json();
+    if(!triviaData.results || triviaData.results.length === 0){
+        throw new Error("No trivia result found");
+    }
+
     const q = triviaData.results[0];
 
     setQuestionData({
@@ -25,12 +29,12 @@ const Question = ({ onAnswer }) => {
 
     setSelected(" ");
     setFeedback(" ");
+  } catch (error){
+    console.error("Failed to fetch question:", error);
+    //optionally set an error state or fallback
+    setQuestionData(null);
+    setFeedback("Failed to load question. Please try again.")
   };
-
-  useEffect(() => {
-    fetchQuestion();
-  }, []);
-
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!selected) return;
