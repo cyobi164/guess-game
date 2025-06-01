@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import "./Question.css";
 
-const Question = ({ onAnswer }) => {
+const Question = ({ onAnswer = () => {} }) => {
     const [questionData, setQuestionData] = useState(null);
     const [selected, setSelected] = useState("");
     const [feedback, setFeedback] = useState("");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
+    const [isAnswer, setIsAnswer] = useState(false);
 
     //shuffle option helper
     const shuffle = (arr) => [...arr].sort(() => Math.random() -0.5);
@@ -43,6 +44,8 @@ const Question = ({ onAnswer }) => {
             setQuestionData(null);
             setFeedback("Failed to load question. please try again");
         }
+
+        setIsAnswer(false); 
     };
 
     //Initial loading + fetch first question after 2 sec
@@ -66,10 +69,20 @@ const Question = ({ onAnswer }) => {
         );
         onAnswer(isCorrect);
 
-        setTimeout(() => {
-            fetchQuestion();
-        }, 1500);
+        setIsAnswer(true); // for nxt button
+
     };
+
+    //handle answer
+    const handleAnswer = (isCorrect) => {
+        if(isCorrect){
+            console.log("Correct Answer!");
+        }else{
+            console.log("Wrong answer!");
+        }
+    };
+
+    <Question onAnswer={handleAnswer} />
 
     if (loading){
         return(
@@ -79,15 +92,21 @@ const Question = ({ onAnswer }) => {
                 </div>
             </div>
         );
-    }
+    } 
 
-    if(!questionData){
+    //for error
+    if(error){
+        //show error only if loading is false and error is true
         return(
             <div className="error-screen">
-                <p>{feedback || "Error loading question."}</p>
+                <p>{feedback || "Error Loading Question."}</p>
                 <button onClick={fetchQuestion}>Try again</button>
             </div>
         );
+    }
+
+    if(!questionData){
+        return null;
     }
 
     return(
@@ -116,6 +135,12 @@ const Question = ({ onAnswer }) => {
                     </button>
                 </form>
                 <p style ={{whiteSpace: "pre-line"}}>{feedback}</p>
+
+                {
+                    isAnswer && (
+                        <button onClick={fetchQuestion}>Next</button>
+                    )
+                }
             </div>
         </>
     );
