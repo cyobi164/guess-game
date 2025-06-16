@@ -6,6 +6,7 @@ import Play from "./components/Menu/index";
 const App = () => {
   const [score, setScore] = useState(0);
   const [showQuiz, setShowQuiz] = useState(false);
+  const [isCorrect, setIsCorrect] = useState(null);
 
   const handleAnswer = ( isCorrect) => {
     if(isCorrect){
@@ -27,7 +28,7 @@ const App = () => {
         </div>
       ) : (
         <>
-          <Question onAnswer={handleAnswer} />
+          <Question onAnswer={handleAnswer} setIsCorrect={setIsCorrect} />
           {/*only show score after loading screen */}
           <div className="score-display">
             <p>Score : {score}</p>
