@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./Question.css";
 
-const Question = ({ onAnswer = () => {}, categoryId, difficulty, score }) => {
+const Question = ({ onAnswer = () => {}, categoryId, difficulty, score, onloaded }) => {
   const [questionData, setQuestionData] = useState(null);
   const [selected, setSelected] = useState("");
   const [feedback, setFeedback] = useState("");
@@ -38,6 +38,11 @@ const Question = ({ onAnswer = () => {}, categoryId, difficulty, score }) => {
         correct: q.correct_answer,
         options: shuffle([q.correct_answer, ...q.incorrect_answers]),
       });
+
+      //hide the description after loading
+      if (typeof onloaded === "function"){
+        onloaded();
+      }
 
       setSelected("");
       setFeedback("");

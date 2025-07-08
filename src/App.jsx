@@ -2,7 +2,89 @@ import React, { useState } from "react";
 import Question from "./components/Question/Index";
 import Score from "./components/Score/Index";
 
-// Grouped categories
+const App = () => {
+  const [score, setScore] = useState(0);
+  const [showQuiz, setShowQuiz] = useState(false);
+  const [showTryAgain, setShowTryAgain] = useState(false);
+  const [showDescription, setShowDescription] = useState(true);
+
+  const categoryID = 10;
+
+  const getdifficulty = () => {
+    if (score >= 10) return "hard";
+    if (score >= 5) return "medium";
+    return "easy";
+  };
+
+  const handleStart = () => {
+    setShowQuiz(true);
+    setScore(0);
+    setShowDescription(true); // reset description every time game starts
+  };
+
+  const handleAnswer = (isCorrect) => {
+    if (isCorrect) {
+      setScore((prev) => prev + 1);
+    } else {
+      setShowQuiz(false);
+      setShowTryAgain(true);
+    }
+  };
+
+  const handleTryAgain = () => {
+    setShowTryAgain(false);
+    setScore(0);
+    setShowQuiz(false); // back to menu
+  };
+
+  return (
+    <div className="app">
+      {/*try again screen */}
+      {showTryAgain ? (
+        <div className="try-again-screen">
+          <h2>Incorrect Answer 😢</h2>
+          <button onClick={handleTryAgain}>Return To Menu</button>
+          <button onClick={() => {
+            setShowQuiz(true);
+            setShowTryAgain(false);
+            setShowDescription(true);
+          }}
+          >Try Again</button>
+        </div>
+      ) : !showQuiz ? (
+        <div className="welcome-screen">
+          <h1>Quiz Game</h1>
+          <button onClick={handleStart}>Play</button>
+        </div>
+      ) : (
+        <>
+          {/*for description */}
+          {showDescription && (
+            <div className="description">
+              <p>
+                Welcome to the Game. It is just a prototype game but you can enjoy it.
+                <br />
+                Thank you for playing, hope you enjoy!!
+              </p>
+            </div>
+          )}
+          {/*question component */}
+          <Question
+            onAnswer={handleAnswer}
+            onloaded={() => setShowDescription(false)}
+            categoryId={categoryID}
+            difficulty={getdifficulty()}
+            score={score}
+          />
+        </>
+      )}
+    </div>
+  )
+};
+
+export default App;
+
+/*Grouped categories
 const categoriesGroup = {
   "Science & Math": [
     { id: 18, name: "Science: Computers" },
@@ -15,9 +97,9 @@ const categoriesGroup = {
     { id: 23, name: "History" },
     { id: 25, name: "Games" },
   ],
-};
+};*/
 
-// Difficulty levels
+/*Difficulty levels
 const difficulties = ["easy", "medium", "hard"];
 
 const App = () => {
@@ -58,68 +140,4 @@ const App = () => {
     setScore(0);
     setShowTryAgain(false);
   }
-
-  return (
-  <div className="app">
-    {showTryAgain ? (
-      <div className="try-again-screen">
-        <h2>Incorrect Answer 😢</h2>
-        <button onClick={handleTryAgain}>Return to Menu</button>
-        {categoryId && difficulty && (
-          <button onClick={() => {
-            setShowTryAgain(false);
-            setShowQuiz(true);
-          }}>
-            Try Again
-          </button>
-        )}
-      </div>
-    ) : !showQuiz ? (
-      <div className="welcome-screen">
-        <h1>Quiz Game</h1>
-        {!categoryId ? (
-          <>
-            <p>Select a Category</p>
-            <div className="category-grid">
-              {Object.entries(categoriesGroup).map(([groupName, groupItems]) => (
-                <div key={groupName}>
-                  <h3>{groupName}</h3>
-                  {groupItems.map((cat) => (
-                    <button key={cat.id} onClick={() => setCategoryId(cat.id)}>
-                      {cat.name}
-                    </button>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </>
-        ) : !difficulty ? (
-          <>
-            <p>Select Difficulty</p>
-            <div className="difficulty-grid">
-              {difficulties.map((level) => (
-                <button key={level} onClick={() => handleDifficultySelect(level)}>
-                  {level}
-                </button>
-              ))}
-            </div>
-          </>
-        ) : null}
-      </div>
-    ) : (
-      <>
-        <Question
-          onAnswer={(isCorrect) => {
-            handleAnswer(isCorrect);
-          }}
-          categoryId={categoryId}
-          difficulty={difficulty}
-          score={score}
-        />
-      </>
-    )}
-  </div>
-);
-};
-
-export default App;
+*/
