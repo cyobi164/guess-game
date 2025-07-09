@@ -8,8 +8,13 @@ const App = () => {
   const [showTryAgain, setShowTryAgain] = useState(false);
   const [showDescription, setShowDescription] = useState(true);
 
-  const categoryID = 10;
+  const randomCategory = () => {
+    const categories = [9, 10, 11, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
+    return categories[Math.floor*Math.random() * categories.length];
+  };
 
+  const categoriesId = randomCategory();
+  
   const getdifficulty = () => {
     if (score >= 10) return "hard";
     if (score >= 5) return "medium";
