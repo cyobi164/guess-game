@@ -1,34 +1,55 @@
 import React, { useEffect, useState } from "react";
 import "./Question.css";
 
-const Question = ({ onAnswer = () => {}, categoryId, difficulty, score, onloaded }) => {
+const Question = ({
+  onAnswer = () => {},
+  categoryId,
+  difficulty,
+  score,
+  onloaded,
+}) => {
   const [questionData, setQuestionData] = useState(null);
   const [selected, setSelected] = useState("");
   const [feedback, setFeedback] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [isAnswer, setIsAnswer] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
 
   const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
+
+  const decodeHtml = (html) => {
+    const txt = document.createElement("textarea");
+    txt.innerHTML = html;
+    return txt.value;
+  };
 
   const fetchQuestion = async (retryCount = 0) => {
     if (retryCount > 3) {
       setError(true);
-      setFeedback("Unable to load question. Please try again");
+      setFeedback("Unable to load question. Please try again.");
       setLoading(false);
       return;
     }
 
     setLoading(true);
+
+    const url = `https://opentdb.com/api.php?amount=1&type=multiple&category=${categoryId}&difficulty=${difficulty.toLowerCase()}`;
+    console.log(`Fetching: ${url}`);
+
     try {
-      const res = await fetch(
-        `https://opentdb.com/api.php?amount=1&type=multiple&category=${categoryId}&difficulty=${difficulty.toLowerCase()}`
-      );
+      const res = await fetch(url);
       const data = await res.json();
 
       if (!data.results || data.results.length === 0) {
-        console.warn("No question found. Retrying...");
+        console.warn("No question found. Retrying... Attempt", retryCount + 1);
+
+        // Retry with easier difficulty if needed
+        const easierDifficulty =
+          retryCount >= 2 ? "easy" : difficulty.toLowerCase();
+
+        const fallbackUrl = `https://opentdb.com/api.php?amount=1&type=multiple&category=${categoryId}&difficulty=${easierDifficulty}`;
+        console.log(`Retrying with fallback URL: ${fallbackUrl}`);
+
         return fetchQuestion(retryCount + 1);
       }
 
@@ -39,20 +60,18 @@ const Question = ({ onAnswer = () => {}, categoryId, difficulty, score, onloaded
         options: shuffle([q.correct_answer, ...q.incorrect_answers]),
       });
 
-      //hide the description after loading
-      if (typeof onloaded === "function"){
-        onloaded();
-      }
+      if (typeof onloaded === "function") onloaded();
 
       setSelected("");
       setFeedback("");
       setError(false);
       setIsAnswer(false);
-    } catch (error) {
-      console.error("Failed to fetch question: ", error);
+    } catch (err) {
+      console.error("Fetch error:", err);
       setError(true);
       setFeedback("Failed to load question. Please try again.");
     }
+
     setLoading(false);
   };
 
@@ -60,6 +79,7 @@ const Question = ({ onAnswer = () => {}, categoryId, difficulty, score, onloaded
     const timer = setTimeout(() => {
       fetchQuestion();
     }, 1000);
+
     return () => clearTimeout(timer);
   }, [categoryId, difficulty]);
 
@@ -72,18 +92,12 @@ const Question = ({ onAnswer = () => {}, categoryId, difficulty, score, onloaded
 
     setFeedback(
       isCorrect
-        ? "Correct!"
-        : `Incorrect\nThe correct answer is: ${questionData.correct}`
+        ? "✅ Correct!"
+        : `❌ Incorrect\nCorrect answer: ${questionData.correct}`
     );
 
     onAnswer(isCorrect);
   };
-
-  function decodeHtml(html) {
-    const txt = document.createElement("textarea");
-    txt.innerHTML = html;
-    return txt.value;
-  }
 
   if (loading) {
     return (
@@ -99,7 +113,7 @@ const Question = ({ onAnswer = () => {}, categoryId, difficulty, score, onloaded
     return (
       <div className="error-screen">
         <p>{feedback || "Error loading question."}</p>
-        <button onClick={fetchQuestion}>Try Again</button>
+        <button onClick={() => fetchQuestion()}>Try Again</button>
       </div>
     );
   }
@@ -109,7 +123,7 @@ const Question = ({ onAnswer = () => {}, categoryId, difficulty, score, onloaded
   return (
     <div className="question">
       <h2>{questionData.question}</h2>
-      <h3>Score : {score}</h3>
+      <h3>Score: {score}</h3>
 
       <form onSubmit={handleSubmit}>
         {questionData.options.map((option, i) => (

@@ -77,7 +77,7 @@ const App = () => {
           <Question
             onAnswer={handleAnswer}
             onloaded={() => setShowDescription(false)}
-            categoryId={categoryID}
+            categoryId={categoriesId}
             difficulty={getdifficulty()}
             score={score}
           />
